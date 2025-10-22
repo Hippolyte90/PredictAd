@@ -1,0 +1,18 @@
+numpy
+pandas
+Pillow
+moviepy
+librosa
+soundfile
+tqdm
+requests
+python-dotenv
+
+# modèles open-source
+transformers>=4.30.0
+torchaudio
+torch>=1.12.0
+whisper-audio   # optionnel: si tu veux la lib whisper (ou utiliser transformers whisper)
+sentence-transformers
+ftfy
+accelerate
