@@ -50,7 +50,7 @@ def transcribe_audio_whisper(audio_path, device=None):
     import numpy as np
     speech, sr = sf.read(audio_path)
     
-    # ✅ Si plusieurs canaux, on passe en mono
+    # ✅ Si plusieurs canaux, on passe en   mono
     if speech.ndim > 1:
         speech = np.mean(speech, axis=1)
 
