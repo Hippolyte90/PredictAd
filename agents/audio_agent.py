@@ -1,6 +1,6 @@
 # predictad/agents/audio_agent.py
-from predictad.preprocess import extract_audio_features
-from predictad.models_open_source import transcribe_audio_whisper
+from PredictAd.preprocess import extract_audio_features
+from PredictAd.models_open_source import transcribe_audio_whisper
 import numpy as np
 import os
 

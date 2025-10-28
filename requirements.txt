@@ -1,5 +1,6 @@
 numpy
 pandas
+matplotlib
 Pillow
 moviepy
 librosa
@@ -10,9 +11,11 @@ python-dotenv
 
 # modèles open-source
 transformers>=4.30.0
-torchaudio
-torch>=1.12.0
-whisper-audio   # optionnel: si tu veux la lib whisper (ou utiliser transformers whisper)
+torch==2.9.0 
+torchaudio==2.9.0
+openai-whisper   
 sentence-transformers
+transformers
 ftfy
 accelerate
+huggingface_hub[hf_xet]

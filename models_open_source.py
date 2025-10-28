@@ -4,6 +4,8 @@
 
 import os
 import warnings
+import librosa
+
 
 # Tentatives d'import
 try:
@@ -47,9 +49,20 @@ def transcribe_audio_whisper(audio_path, device=None):
     import soundfile as sf
     import numpy as np
     speech, sr = sf.read(audio_path)
+    
+    # ✅ Si plusieurs canaux, on passe en mono
+    if speech.ndim > 1:
+        speech = np.mean(speech, axis=1)
+
     # Whisper expects float32
     if speech.dtype != "float32":
         speech = speech.astype("float32")
+        
+    if sr != 16000:
+        print(f"⚠️ Resampling automatique de {sr} Hz vers 16000 Hz...")
+        speech = librosa.resample(speech, orig_sr=sr, target_sr=16000)
+        sr = 16000
+    
     inputs = proc(speech, sampling_rate=sr, return_tensors="pt")
     input_features = inputs.input_features
     if device and torch:
@@ -78,6 +91,7 @@ def image_caption_blip(image_path, device=None):
     out = model.generate(**inputs)
     caption = proc.decode(out[0], skip_special_tokens=True)
     return caption
+
 
 def clip_image_text_similarity(image_path, text, device=None):
     """
