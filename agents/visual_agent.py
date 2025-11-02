@@ -2,7 +2,7 @@
 from PIL import Image, ImageStat
 import numpy as np
 import os
-from predictad.models_open_source import image_caption_blip, clip_image_text_similarity
+from models_open_source import image_caption_blip, clip_image_text_similarity
 
 def analyze_image(image_path, script_text=None):
     try:
@@ -35,13 +35,22 @@ def analyze_image(image_path, script_text=None):
         "text_similarity": text_similarity
     }
 
-def aggregate_frame_analyses(frame_paths, script_text=None):
+def aggregate_images_analyses(frame_paths, script_text=None):
+    brightnesses = []
+    variances = []
+    aspect = []
     scores = []
     captions = []
     sims = []
     for p in frame_paths:
         try:
             r = analyze_image(p, script_text=script_text)
+            if r.get("mean_brightness") is not None:
+                brightnesses.append(r["mean_brightness"])
+            if r.get("variance") is not None:
+                variances.append(r["variance"])
+            if r.get("aspect_ratio") is not None:
+                aspect.append(r["aspect_ratio"])
             if r.get("visual_score") is not None:
                 scores.append(r["visual_score"])
             if r.get("caption"):
@@ -51,8 +60,11 @@ def aggregate_frame_analyses(frame_paths, script_text=None):
         except:
             continue
     return {
+        "mean_brightness": float(sum(brightnesses)/len(brightnesses)) if brightnesses else 0.0,
+        "mean_variance": float(sum(variances)/len(variances)) if variances else 0.0,
+        "mean_aspect_ratio": float(sum(aspect)/len(aspect)) if aspect else 0.0,
         "mean_visual": float(sum(scores)/len(scores)) if scores else 0.0,
         "n_frames": len(scores),
-        "captions": captions[:5],
+        "captions": captions,
         "mean_text_similarity": float(sum(sims)/len(sims)) if sims else None
     }

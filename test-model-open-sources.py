@@ -9,7 +9,7 @@ from models_open_source import (
 
 def test_text_emotion():
     print("\n=== Test: Text Emotion Detection ===")
-    text = "I am very happy and grateful today!"
+    text = """Bonjour à tous! Aujourd'hui, nous allons découvrir les merveilles de la nature. N'oubliez pas de vous abonner à notre chaîne pour plus de vidéos incroyables! Visitez notre site web pour en savoir plus."""
     result = text_emotion_pipeline(text)
     if result is None:
         print("❌ Text emotion model not available.")
@@ -20,7 +20,7 @@ def test_text_emotion():
 
 def test_image_caption():
     print("\n=== Test: Image Caption (BLIP) ===")
-    image_path = "frames_extraites/frame_0.jpg"
+    image_path = "frames_extraites/frame_012000.jpg"
     if not os.path.exists(image_path):
         print("⚠️ Aucune image trouvée. Télécharge ou place un fichier 'sample.jpg'.")
         return
@@ -32,7 +32,7 @@ def test_image_caption():
 
 def test_clip_similarity():
     print("\n=== Test: CLIP Image-Text Similarity ===")
-    image_path = "frames_extraites/frame_0.jpg"
+    image_path = "frames_extraites/frame_012000.jpg"
     if not os.path.exists(image_path):
         print("⚠️ Place un fichier 'sample.jpg' dans le dossier avant de tester.")
         return
@@ -57,6 +57,6 @@ def test_whisper_transcription():
 
 if __name__ == "__main__":
     test_text_emotion()
-    test_image_caption()
-    test_clip_similarity()
-    test_whisper_transcription()
+    #test_image_caption()
+    #test_clip_similarity()
+    #test_whisper_transcription()

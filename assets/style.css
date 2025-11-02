@@ -1,0 +1,21 @@
+body {
+    background-color: #f7fafc;
+}
+
+.stButton>button {
+    background-color: #0b6efd;
+    color: white;
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-weight: 600;
+}
+
+h1, h2, h3 {
+    font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial;
+}
+
+.streamlit-expanderHeader {
+    font-weight: 600;
+}
+
+

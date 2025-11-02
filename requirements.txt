@@ -16,6 +16,11 @@ torchaudio==2.9.0
 openai-whisper   
 sentence-transformers
 transformers
+accelerate 
+bitsandbytes
 ftfy
 accelerate
 huggingface_hub[hf_xet]
+python-dotenv
+openai
+streamlit

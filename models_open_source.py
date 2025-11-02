@@ -5,7 +5,15 @@
 import os
 import warnings
 import librosa
+import torch
+import soundfile as sf
+import numpy as np
+warnings.filterwarnings('ignore')
 
+
+from transformers import Wav2Vec2ForCTC, Wav2Vec2Processor
+processor = Wav2Vec2Processor.from_pretrained("facebook/wav2vec2-base-960h")
+model = Wav2Vec2ForCTC.from_pretrained("facebook/wav2vec2-base-960h")
 
 # Tentatives d'import
 try:
@@ -24,7 +32,7 @@ except Exception as e:
     torch = None
 
 # Choix de modèles (open-source). Tu peux remplacer par d'autres modèles HF si tu veux.
-WHISPER_MODEL = "openai/whisper-small"            # transcription
+WHISPER_MODEL = "openai/whisper-medium"            # transcription
 CLIP_MODEL = "openai/clip-vit-base-patch32"       # embeddings / image-text similarity
 BLIP_CAPTION = "Salesforce/blip-image-captioning-base"  # captioning
 TEXT_SENTIMENT = "j-hartmann/emotion-english-distilroberta-base"  # emotion detection
@@ -39,37 +47,81 @@ def load_whisper_model(device=None):
     model.to(device)
     return proc, model
 
-def transcribe_audio_whisper(audio_path, device=None):
+def transcribe_audio_whisper(audio_path, device=None, chunk_length_s=30):
     """
-    Renvoie la transcription texte. Si whisper non disponible, renvoie stub.
+    Renvoie la transcription texte avec détection automatique de la langue et gestion améliorée du découpage.
     """
     if WhisperProcessor is None:
         return None
+        
     proc, model = load_whisper_model(device=device)
-    import soundfile as sf
-    import numpy as np
     speech, sr = sf.read(audio_path)
     
-    # ✅ Si plusieurs canaux, on passe en   mono
+    # Conversion en mono si nécessaire
     if speech.ndim > 1:
         speech = np.mean(speech, axis=1)
 
-    # Whisper expects float32
+    # Conversion en float32
     if speech.dtype != "float32":
         speech = speech.astype("float32")
         
+    # Resampling à 16kHz si nécessaire
     if sr != 16000:
-        print(f"⚠️ Resampling automatique de {sr} Hz vers 16000 Hz...")
         speech = librosa.resample(speech, orig_sr=sr, target_sr=16000)
         sr = 16000
     
-    inputs = proc(speech, sampling_rate=sr, return_tensors="pt")
-    input_features = inputs.input_features
-    if device and torch:
-        input_features = input_features.to(model.device)
-    predicted_ids = model.generate(input_features)
-    transcription = proc.batch_decode(predicted_ids, skip_special_tokens=True)[0]
-    return transcription
+    # Calcul de la taille des chunks avec chevauchement
+    chunk_size = int(sr * chunk_length_s)
+    overlap = int(chunk_size * 0.1)  # 10% de chevauchement
+    texts = []
+
+    for start in range(0, len(speech), chunk_size - overlap):
+        chunk = speech[start:start + chunk_size]
+        
+        # Padding si nécessaire pour le dernier chunk
+        if len(chunk) < chunk_size:
+            chunk = np.pad(chunk, (0, chunk_size - len(chunk)))
+            
+        inputs = proc(chunk, 
+                     sampling_rate=sr, 
+                     return_tensors="pt",
+                     padding=True)
+        
+        # Génération avec paramètres optimisés
+        generated_ids = model.generate(
+            inputs.input_features.to(model.device),
+            max_length=448,
+            num_beams=5,
+            length_penalty=1.0,
+            no_repeat_ngram_size=3,
+            temperature=0.7,
+            do_sample=False,
+            return_timestamps=True
+        )
+        
+        text = proc.batch_decode(generated_ids, skip_special_tokens=True)[0]
+        texts.append(text)
+
+    # Fusion intelligente des segments
+    final_text = ""
+    for i, text in enumerate(texts):
+        if i == 0:
+            final_text = text
+        else:
+            # Éviter les doublons aux jonctions
+            overlap_words = 5
+            prev_words = final_text.split()[-overlap_words:]
+            curr_words = text.split()[:overlap_words]
+            
+            # Trouver le point de jonction optimal
+            for j in range(overlap_words):
+                if prev_words[j:] == curr_words[:len(prev_words[j:])]:
+                    final_text = final_text + " " + " ".join(text.split()[len(prev_words[j:]):])
+                    break
+            else:
+                final_text = final_text + " " + text
+
+    return final_text.strip()
 
 def image_caption_blip(image_path, device=None):
     """

@@ -1,33 +1,86 @@
 # predictad/agents/synth_agent.py
-from predictad import utils
-import json
+import numpy as np
+import matplotlib.pyplot as plt
 
-def synthesize(linguistic_res, visual_res, audio_res, config):
-    w = config.get("weights", {"emotion":0.4,"brand_coherence":0.3,"creativity":0.2,"clarity":0.1})
-    emotion_score = (linguistic_res.get("emotion_proxy",0) + audio_res.get("emotion_energy",0) + visual_res.get("mean_visual",0))/3
-    clarity_score = linguistic_res.get("clarity",0)
-    creativity_score = visual_res.get("mean_visual",0) * 0.7 + (1 - abs(1 - linguistic_res.get("avg_word_len",4)/5))*0.3
-    # brand coherence: use clip similarity if available
-    brand_coherence = 0.5 + 0.5*min(1, clarity_score + (visual_res.get("mean_text_similarity") or 0))
-    global_score = (emotion_score * w.get("emotion",0.4)
-                    + brand_coherence * w.get("brand_coherence",0.3)
-                    + creativity_score * w.get("creativity",0.2)
-                    + clarity_score * w.get("clarity",0.1))
-    out = {
-        "emotion_score": utils.normalize_score(emotion_score),
-        "clarity_score": utils.normalize_score(clarity_score),
-        "creativity_score": utils.normalize_score(creativity_score),
-        "brand_coherence_score": utils.normalize_score(brand_coherence),
-        "global_score": utils.normalize_score(global_score)
+def normalize(value, vmin, vmax):
+    """Normalise une valeur entre 0 et 1."""
+    return max(0, min(1, (value - vmin) / (vmax - vmin)))
+
+def compute_scores(audio, image, script):
+    """Calcule les scores principaux à partir des sorties brutes des 3 agents."""
+
+    # === 1. SCORE AUDIO ===
+    tempo_norm = normalize(audio.get("tempo", 0), 60, 180) # Rythme de la vidéo
+    rms_norm = normalize(audio.get("rms", 0), 0.02, 0.18) # Volume perçu
+    emotion_energy = audio.get("emotion_energy", 0) # Intensité émotionnelle moyenne
+    audio_score = np.mean([tempo_norm, rms_norm, emotion_energy])
+
+    # === 2. SCORE VISUEL ===
+    brightness_norm = normalize(image.get("mean_brightness", 0), 30, 200) # Luminosité modérée
+    text_sim = image.get("mean_text_similarity", 0.2) # Cohérence texte–image
+    visual_score = 0.3 * brightness_norm + 0.7 * text_sim
+
+    # === 3. SCORE LINGUISTIQUE ===
+    clarity = script.get("clarity", 0) # Clarté du message
+    cta = 1.0 if script.get("has_cta", False) else 0.0 # Présence d'un CTA
+    joy = script.get("joy", 0.0) # Score de joie
+    emotion_proxy = script.get("emotion_proxy", 0.0) # Intensité émotionnelle globale
+    linguistic_score = 0.3 * clarity + 0.3 * joy + 0.2 * cta + 0.2 * emotion_proxy
+
+    # === 4. SCORE GLOBAL ===
+    final_score = 0.4 * linguistic_score + 0.35 * audio_score + 0.25 * visual_score
+
+    # === 5. Structurer les résultats ===
+    scores = {
+        "cta": script.get("has_cta", False),
+        "Audio": round(audio_score * 100, 1),
+        "Visuel": round(visual_score * 100, 1),
+        "Linguistique": round(linguistic_score * 100, 1),
+        "Global": round(final_score * 100, 1),
     }
-    recs = []
-    if out["clarity_score"] < 60:
-        recs.append("Raccourcir le message / clarifier l'appel à l'action (CTA).")
-    if out["creativity_score"] < 60:
-        recs.append("Renforcer l'élément visuel clé (couleurs, contraste, scène mémorable).")
-    if out["emotion_score"] < 60:
-        recs.append("Augmenter l'intensité émotionnelle via le ton de la voix ou la musique.")
-    if not linguistic_res.get("has_cta", False):
-        recs.append("Ajouter un call-to-action explicite (ex: 'Visitez notre site', 'Abonnez-vous').")
-    out["recommendations"] = recs
-    return out
+
+    return scores
+
+def generate_report(scores):
+    """Affiche un rapport simple."""
+    print("\n===== RAPPORT D'ANALYSE PREDICTAD =====")
+    print(f"🎧 Score Audio       : {scores['Audio']} / 100")
+    print(f"👁️  Score Visuel      : {scores['Visuel']} / 100")
+    print(f"🧠 Score Linguistique : {scores['Linguistique']} / 100")
+    print(f"🌍 Score Global       : {scores['Global']} / 100\n")
+
+    # Interprétation simple
+    if scores['Global'] < 40:
+        niveau = "Pub à faible impact"
+    elif scores['Global'] < 60:
+        niveau = "Pub à Impact moyen"
+    elif scores['Global'] < 80:
+        niveau = "Pub à bon impact"
+    else:
+        niveau = "Pub à excellent impact"
+
+    print(f"➡️ Interprétation : {niveau}")
+    
+    return niveau
+
+def plot_radar(scores):
+    """Trace un graphique radar des scores."""
+    categories = list(scores.keys())[1:-1]  # sauf Global
+    # print(categories)
+    values = [scores[k] for k in categories]
+    values += [values[0]]  # fermer le polygone
+
+    angles = np.linspace(0, 2 * np.pi, len(categories), endpoint=False).tolist()
+    angles += [angles[0]]
+
+    fig = plt.figure(figsize=(6, 6))
+    ax = plt.subplot(111, polar=True)
+    ax.plot(angles, values, linewidth=2, linestyle='solid')
+    ax.fill(angles, values, alpha=0.25)
+    ax.set_yticks([20, 40, 60, 80, 100])
+    ax.set_xticks(angles[:-1])
+    ax.set_xticklabels(categories)
+    ax.set_title("Profil d'impact publicitaire")
+    plt.show()
+    return fig
+    
