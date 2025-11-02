@@ -43,8 +43,8 @@ st.sidebar.markdown(
 
 # File uploader : ne pas mettre unsafe_allow_html ici
 uploaded = st.sidebar.file_uploader(
-    label="",  # on laisse le label vide parce que l'UI est faite ci-dessus
-    type=["mp4"]
+    label="",  
+    type=["mp4"], label_visibility="collapsed"
 )
 if uploaded is None:
     st.sidebar.info("ℹ️ Upload une vidéo pour lancer l'analyse.")
