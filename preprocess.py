@@ -4,7 +4,7 @@ Pré-traitement: extraction de frames, transcript (si audio), features audio sim
 Dépend de moviepy et librosa.
 """
 import os
-from moviepy import VideoFileClip
+from moviepy.editor import VideoFileClip # from moviepy.editor import VideoFileClip for deployment
 import soundfile as sf
 import numpy as np
 from PIL import Image
