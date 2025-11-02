@@ -2,18 +2,26 @@
 import os
 from dotenv import load_dotenv
 from openai import OpenAI
+from huggingface_hub import login
 
-from dotenv import load_dotenv
 
 
-load_dotenv(override=True)
-openai_api_key = os.getenv('OPENAI_API_KEY')
-
-if openai_api_key:
-    print(f"OpenAI API Key exists and begins {openai_api_key[:8]}")
-else:
-    print("OpenAI API Key not set")
+def config_env():
+    load_dotenv(override=True)
+    openai_api_key = os.getenv('OPENAI_API_KEY')
     
+    # Setting environment to use HuggingFace open source models
+    hf_token = os.environ['HF_TOKEN']
+    login(hf_token, add_to_git_credential=True)
+
+    if openai_api_key and hf_token:
+        print(f"OpenAI API Key exists and begins {openai_api_key[:8]}")
+        return True
+    else:
+        print("OpenAI API Key not set")
+    
+config_env()
+
 openai = OpenAI()
 
 # We will use GPT-4o-mini for wraping 

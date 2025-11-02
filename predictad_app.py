@@ -6,7 +6,9 @@ from pathlib import Path
 from main import treat_video_ad
 from agents.synth_agent import generate_report, plot_radar
 from recommandation import generate_recommendations
+from message_gpt import config_env
 
+conf = config_env()
 
 
 # ========== CSS ==========
@@ -23,6 +25,13 @@ if Path("assets/style.css").exists():
 st.title("🧩Avoir plus d'Impact avec vos pub Youtube🧩")
 st.markdown(" Analysez vos vidéos publicitaires YouTube avec **PredictAd** et obtenez des recommandations pour maximiser leur impact.")    
 st.sidebar.title("PredictAd")
+
+st.sidebar.title("🔑 Clés API")
+if conf:
+    st.sidebar.success(f"Confirme: {conf}")
+else:
+    st.sidebar.warning("Echec de Configuration ")
+
 
 
 st.sidebar.markdown(

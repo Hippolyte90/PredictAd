@@ -4,12 +4,15 @@ Pré-traitement: extraction de frames, transcript (si audio), features audio sim
 Dépend de moviepy et librosa.
 """
 import os
-from moviepy.editor import VideoFileClip # from moviepy import VideoFileClip for local runing beacause of moviepy version of python 12
+from moviepy.editor import VideoFileClip # from moviepy.edictor import VideoFileClip for local runing beacause of moviepy version of python 12
 import soundfile as sf
 import numpy as np
 from PIL import Image
 from tqdm import tqdm
 from models_open_source import transcribe_audio_whisper
+from message_gpt import config_env
+
+config_env()
 
 
 def extract_audio_from_video(video_path, out_audio_path="extracted_audio.wav"):
