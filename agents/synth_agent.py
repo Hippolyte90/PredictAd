@@ -17,7 +17,7 @@ def compute_scores(audio, image, script):
 
     # === 2. SCORE VISUEL ===
     brightness_norm = normalize(image.get("mean_brightness", 0), 30, 200) # Luminosité modérée
-    text_sim = image.get("mean_text_similarity", 0.2) # Cohérence texte–image
+    text_sim = float(image.get("mean_text_similarity") or 0.2) # Cohérence texte–image
     visual_score = 0.3 * brightness_norm + 0.7 * text_sim
 
     # === 3. SCORE LINGUISTIQUE ===

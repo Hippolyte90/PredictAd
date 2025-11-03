@@ -12,8 +12,8 @@ warnings.filterwarnings('ignore')
 
 
 from transformers import Wav2Vec2ForCTC, Wav2Vec2Processor
-processor = Wav2Vec2Processor.from_pretrained("facebook/wav2vec2-base-960h")
-model = Wav2Vec2ForCTC.from_pretrained("facebook/wav2vec2-base-960h")
+processor = Wav2Vec2Processor.from_pretrained("facebook/wav2vec2-base-960h",token=os.getenv("HF_TOKEN"))
+model = Wav2Vec2ForCTC.from_pretrained("facebook/wav2vec2-base-960h",token=os.getenv("HF_TOKEN"))
 
 # Tentatives d'import
 try:
@@ -40,8 +40,8 @@ TEXT_SENTIMENT = "j-hartmann/emotion-english-distilroberta-base"  # emotion dete
 def load_whisper_model(device=None):
     if WhisperProcessor is None:
         return None, None
-    proc = WhisperProcessor.from_pretrained(WHISPER_MODEL)
-    model = WhisperForConditionalGeneration.from_pretrained(WHISPER_MODEL)
+    proc = WhisperProcessor.from_pretrained(WHISPER_MODEL,token=os.getenv("HF_TOKEN"))
+    model = WhisperForConditionalGeneration.from_pretrained(WHISPER_MODEL,token=os.getenv("HF_TOKEN"))
     if device is None:
         device = "cuda" if torch and torch.cuda.is_available() else "cpu"
     model.to(device)
@@ -134,8 +134,8 @@ def image_caption_blip(image_path, device=None):
         return None
     if device is None:
         device = "cuda" if torch and torch.cuda.is_available() else "cpu"
-    proc = BlipProcessor.from_pretrained("Salesforce/blip-image-captioning-base")
-    model = BlipForConditionalGeneration.from_pretrained("Salesforce/blip-image-captioning-base")
+    proc = BlipProcessor.from_pretrained("Salesforce/blip-image-captioning-base", token=os.getenv("HF_TOKEN"))
+    model = BlipForConditionalGeneration.from_pretrained("Salesforce/blip-image-captioning-base", token=os.getenv("HF_TOKEN"))
     model.to(device)
     from PIL import Image
     img = Image.open(image_path).convert("RGB")
@@ -174,7 +174,8 @@ def text_emotion_pipeline(text):
     if pipeline is None:
         return None
     try:
-        nlp = pipeline("text-classification", model=TEXT_SENTIMENT, return_all_scores=True)
+        nlp = pipeline("text-classification", model=TEXT_SENTIMENT, return_all_scores=True, truncation=True,
+    max_length=512, token=os.getenv("HF_TOKEN"))
     except Exception:
         # fallback: generic sentiment pipeline
         try:
