@@ -11,10 +11,12 @@ def config_env():
     openai_api_key = os.getenv('OPENAI_API_KEY')
     
     # Setting environment to use HuggingFace open source models
-    hf_token = os.environ['HF_TOKEN']
-    login(hf_token, add_to_git_credential=True)
+    #hf_token = os.environ['HF_TOKEN']
+    token=os.getenv("HF_TOKEN")
+    login(token)
+    #login(hf_token, add_to_git_credential=True)
 
-    if openai_api_key and hf_token:
+    if openai_api_key and token:
         print(f"OpenAI API Key exists and begins {openai_api_key[:8]}")
         return True
     else:
