@@ -10,9 +10,9 @@ import numpy as np
 from PIL import Image
 from tqdm import tqdm
 from models_open_source import transcribe_audio_whisper
-from message_gpt import config_env
+from message_gpt import config_hf_env
 
-config_env()
+#config_env()
 
 
 def extract_audio_from_video(video_path, out_audio_path="extracted_audio.wav"):

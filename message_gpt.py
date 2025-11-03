@@ -6,7 +6,7 @@ from huggingface_hub import login
 
 
 
-def config_env():
+def config_hf_env():
     load_dotenv(override=True)
     openai_api_key = os.getenv('OPENAI_API_KEY')
     
@@ -16,13 +16,24 @@ def config_env():
     login(token)
     #login(hf_token, add_to_git_credential=True)
 
-    if openai_api_key and token:
-        print(f"OpenAI API Key exists and begins {openai_api_key[:8]}")
+    if token:
         return True
     else:
         print("OpenAI API Key not set")
     
-config_env()
+    
+    
+def config_open_env():
+    load_dotenv(override=True)
+    openai_api_key = os.getenv('OPENAI_API_KEY')
+    
+    if openai_api_key:
+        print(f"OpenAI API Key exists and begins {openai_api_key[:8]}")
+        return True
+    else:
+        print("OpenAI API Key not set")
+            
+config_open_env()
 
 openai = OpenAI()
 

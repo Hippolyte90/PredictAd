@@ -6,9 +6,11 @@ from pathlib import Path
 from main import treat_video_ad
 from agents.synth_agent import generate_report, plot_radar
 from recommandation import generate_recommendations
-from message_gpt import config_env
+from message_gpt import config_hf_env, config_open_env
 
-conf = config_env()
+conf_hf = config_hf_env()
+conf_open = config_open_env()
+conf = conf_hf and conf_open
 
 
 # ========== CSS ==========
