@@ -2,7 +2,7 @@
 
 ***PredictAd*** is a application build for Youtube AD analysis.
 
-It take in input a Youtube Ad and provide in output the scores and some relevent recommendations to improve the Ad. Curious to see the architecture? It's here:  
+It take in input a Youtube Ad and provide in output the scores and some relevent recommendations to improve the Ad. Curious to see the architecture? It's [here:](https://github.com/Hippolyte90/PredictAd/blob/main/PredictAd%20ARCHITECTURE.pdf)
 
 ## How to compute this app?
 
