@@ -1,7 +1,3 @@
-# predictad/models_open_source.py
-# Adaptateurs pour modèles open-source (Whisper, CLIP, BLIP, text classification)
-# Si les modèles ne sont pas disponibles, on renvoie des stubs/heuristiques.
-
 import os
 import warnings
 import librosa
