@@ -30,5 +30,5 @@ It take in input a Youtube Ad and provide in output the scores and some relevent
 - Compute directly the file in **Git bash** or **bash(MSYS2)**
   
   ```bash
-  predictad_app.py
+  streamlit run predictad_app.py
   ```
