@@ -4,6 +4,8 @@ import librosa
 import torch
 import soundfile as sf
 import numpy as np
+from yt_dlp import YoutubeDL # To download Youtube directly
+
 warnings.filterwarnings('ignore')
 
 
@@ -32,6 +34,41 @@ WHISPER_MODEL = "openai/whisper-medium"            # transcription
 CLIP_MODEL = "openai/clip-vit-base-patch32"       # embeddings / image-text similarity
 BLIP_CAPTION = "Salesforce/blip-image-captioning-base"  # captioning
 TEXT_SENTIMENT = "j-hartmann/emotion-english-distilroberta-base"  # emotion detection
+
+# Download videos
+
+def download_youtube_video(url: str) -> str:
+    """
+    Download a YouTube video and return the local file path.
+    
+    Parameters:
+        url (str): The URL of the YouTube video.
+    
+    Returns:
+        str: The full path to the downloaded video file.
+    """
+    
+    # Create a download folder (if it doesn't exist)
+    download_dir = "downloads"
+    os.makedirs(download_dir, exist_ok=True)
+    
+    # Define download options
+    options = {
+        'format': 'bestvideo+bestaudio/best',   # Best available quality
+        'outtmpl': os.path.join(download_dir, '%(title)s.%(ext)s'),  # Save inside 'downloads/' folder
+        'noplaylist': True,                     # Avoid downloading playlists
+        'quiet': True,                          # Suppress verbose output
+        'merge_output_format': 'mp4'            # Ensure the output is an MP4 file
+    }
+    
+    # Download process
+    with YoutubeDL(options) as ydl:
+        info = ydl.extract_info(url, download=True)  # Extract + download video info
+        file_path = ydl.prepare_filename(info)       # Build the exact file path
+    
+    # Return the full path of the downloaded video
+    return file_path
+
 
 def load_whisper_model(device=None):
     if WhisperProcessor is None:

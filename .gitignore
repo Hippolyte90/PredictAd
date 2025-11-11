@@ -3,7 +3,8 @@ important.txt
 frames_extraites/
 
 output_audio.wav
-__pycache__/
+_pycahe_/
+/__pycache__
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]

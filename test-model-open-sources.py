@@ -4,7 +4,7 @@ from models_open_source import (
     transcribe_audio_whisper,
     image_caption_blip,
     clip_image_text_similarity,
-    text_emotion_pipeline,
+    text_emotion_pipeline, download_youtube_video
 )
 
 def test_text_emotion():
@@ -55,8 +55,13 @@ def test_whisper_transcription():
     else:
         print(f"✅ Transcription : {text}")
 
+
+
 if __name__ == "__main__":
-    test_text_emotion()
+    #test_text_emotion()
     #test_image_caption()
     #test_clip_similarity()
     #test_whisper_transcription()
+    video_url = "https://youtu.be/PEZo9mxbqo8"
+    path = download_youtube_video(video_url)
+    print(f"✅ Video downloaded successfully!\n📁 File path: {path}")
